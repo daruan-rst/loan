@@ -8,13 +8,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class LoanRequest {
 
-    int id;
+    int loanId;
     private String accountId;
     private int numberOfParcels;
     private BigDecimal loanAmmount;
     private BigDecimal tax;
+    private BigDecimal parcelAmmount;
 
     public Loan convert(){
-        return new Loan(this.id, this.accountId, this.numberOfParcels, this.loanAmmount, this.tax);
+        return new Loan(this.loanId, this.accountId, this.numberOfParcels, this.loanAmmount, this.tax, this.parcelAmmount);
     }
 }

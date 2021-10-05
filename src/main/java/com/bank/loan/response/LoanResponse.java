@@ -17,13 +17,15 @@ public class LoanResponse {
     private int numberOfParcels;
     private BigDecimal loanAmmount;
     private BigDecimal tax;
+    private BigDecimal parcelAmmount;
 
     public LoanResponse(Loan loan){
-        this.id = loan.getId();
+        this.id = loan.getLoanId();
         this.accountId = loan.getAccountId();
         this.numberOfParcels = loan.getNumberOfParcels();
         this.loanAmmount = loan.getLoanAmmount();
         this.tax = loan.getTax();
+        this.parcelAmmount = loan.getParcelAmmount();
     }
 
     public static List<LoanResponse> convert(List<Loan> loans){

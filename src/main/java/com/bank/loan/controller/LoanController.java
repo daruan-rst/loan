@@ -1,9 +1,8 @@
 package com.bank.loan.controller;
 
 
-import com.bank.loan.model.Account;
+import com.bank.loan.client.AccountClient;
 import com.bank.loan.model.Loan;
-import com.bank.loan.repository.AccountRepository;
 import com.bank.loan.repository.LoanRepository;
 import com.bank.loan.response.LoanResponse;
 import lombok.AllArgsConstructor;
@@ -21,9 +20,10 @@ import java.util.List;
 public class LoanController {
 
     private LoanRepository loanRepository;
-    private AccountRepository accountRepository;
+//    private AccountRepository accountRepository;
+    private AccountClient accountClient;
 
-    @PostMapping("/new-loan")
+    @PostMapping("/new-loan/{loan-id}")
     public ResponseEntity<LoanResponse> newLoan(
             @RequestParam String accountId,
             @RequestParam BigDecimal loanAmmount,
@@ -33,12 +33,10 @@ public class LoanController {
         BigDecimal loanParcelAmmount = loanAmmount.divide(new BigDecimal(numberOfParcels));
         Loan loan = new Loan(0, accountId, numberOfParcels, loanAmmount,tax,loanParcelAmmount);
 
-        URI uri = uriComponentsBuilder.path("/loans/{id}")
-                .buildAndExpand(loan.getId()).toUri();
+        URI uri = uriComponentsBuilder.path("/loans/{loan-id}")
+                .buildAndExpand(loan.getLoanId()).toUri();
         loanRepository.save(loan);
-        Account thisAccount = accountRepository.findByAccountId(Integer.parseInt(accountId));
-        thisAccount.setMoney(thisAccount.getMoney().add(loanAmmount));
-        accountRepository.save(thisAccount);
+        accountClient.updateAccount(Integer.parseInt(accountId), loanAmmount);
         return ResponseEntity.created(uri).body(new LoanResponse(loan));
     }
 
@@ -53,10 +51,8 @@ public class LoanController {
         loan.setNumberOfParcels(loan.getNumberOfParcels()- numberOfParcelsToBePaid);
         loanRepository.save(loan);
 
-        Account thisAccount = accountRepository.findByAccountId(Integer.parseInt(loan.getAccountId()));
         BigDecimal ammountToBePaid = loan.getParcelAmmount().multiply(loan.getTax()).multiply(new BigDecimal(numberOfParcelsToBePaid));
-        thisAccount.setMoney(thisAccount.getMoney().subtract(ammountToBePaid));
-        accountRepository.save(thisAccount);
+        accountClient.updateAccount(Integer.parseInt(loan.getAccountId()) , ammountToBePaid.negate());
         return ResponseEntity.ok(new LoanResponse(loan));}
 
     @GetMapping("all-paid-loans")
