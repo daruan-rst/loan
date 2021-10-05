@@ -30,5 +30,7 @@ public class Loan {
 
     private BigDecimal tax;
 
+    private BigDecimal parcelAmmount;
+
 
 }
