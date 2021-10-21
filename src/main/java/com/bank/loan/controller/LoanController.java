@@ -5,6 +5,7 @@ import com.bank.loan.client.AccountClient;
 import com.bank.loan.model.Loan;
 import com.bank.loan.repository.LoanRepository;
 import com.bank.loan.response.LoanResponse;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +21,12 @@ import java.util.List;
 public class LoanController {
 
     private LoanRepository loanRepository;
-//    private AccountRepository accountRepository;
+
     private AccountClient accountClient;
 
+    private static final String ACCOUNT_SERVICE ="accountService" ;
+
+    @RateLimiter(name=ACCOUNT_SERVICE, fallbackMethod = "rateLimiterFallback")
     @PostMapping("/new-loan/{loan-id}")
     public ResponseEntity<LoanResponse> newLoan(
             @RequestParam String accountId,
@@ -40,6 +44,7 @@ public class LoanController {
         return ResponseEntity.created(uri).body(new LoanResponse(loan));
     }
 
+    @RateLimiter(name=ACCOUNT_SERVICE, fallbackMethod = "rateLimiterFallback")
     @PutMapping("/pay-parcel")
     public ResponseEntity<LoanResponse> payLoanParcel(
             @RequestParam int loanId,
